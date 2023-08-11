@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Page</title>
+</head>
+<body class="d-flex flex-column">
+    {# Load the tag library #}
+    {% extends "base.html" %}
+    {% load bootstrap5 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+
+    {% block content %}
+    <content>
+
+      <div class="container-fluid px-5 pb-4" align="left">
+        <a href="{% url 'courseSearch' %}" class="link-primary text-decoration-none">← Back to Search</a>
+        <div class="text-center">
+          <h3><span class="text-muted">{{ course.college_name }} |</span> <i>{{ course.mnemonic }} {{ course.course_number }}: {{ course.course_name }}</i></h3>
+        </div>
+      </div>
+      <div class="container-fluid px-5" align="center">
+
+        {% include "messages.html" with messages=messages%}
+
+        <div class="row justify-content-around">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"></div>
+          <div class="col-4 my-auto"><h5>Course Attributes</h5></div>
+          <div class="col-4 my-auto"><h5>Actions</h5></div>
+        </div>
+
+        <div class="row justify-content-around">
+
+          <!-- List Course Attributes -->
+          <div class="col-4 my-auto">
+            <table class="table table-borderless">
+              <tbody>
+                <tr><th>College:</th><td>{{ course.college_name }} {{ foreign }}</td></tr>
+                <tr><th>Mnemonic:</th><td>{{ course.mnemonic }}</td></tr>
+                <tr><th>Number:</th><td>{{ course.course_number }}</td></tr>
+                <tr><th>Title:</th><td>{{ course.course_name }}</td></tr>
+                {% if credits %}<tr><th>Credits:</th><td>{{ credits }}</td></tr>{% endif %}
+              </tbody>
+            </table>
+          </div>
+
+
+          <div class="col-4 my-auto">
+            <!-- Search Similar Course Button -->
+            <div>
+              <form method="post">
+                {% csrf_token %}
+                <!-- Fields for Search Similar Courses-->
+                <input type="hidden" id="college" name="college" value="{{ course.college_name }}">
+                <input type="hidden" id="mnemonic" name="mnemonic" value="{{ course.mnemonic }}">
+                <input type="hidden" id="number" name="number" value="">
+                <input type="hidden" id="name" name="name" value="">
+                <!-- Fields for Add to Cart -->
+                <input type="hidden" id="courseID" name="courseID" value="{{ course.id }}">
+                <input type="hidden" id="model" name="model" value="{{ course.get_model }}">
+
+                <!-- Search Similar Courses-->
+                <button formaction="{% url 'submit_search' %}" type="submit" class="btn btn-outline-primary w-100 my-1">Search Similar Courses</button>
+                {% if isAdmin %}
+                  <!-- Edit Course -->
+                  <a href="{% url course.get_model|add:'Update' course.pk %}" type="submit" class="btn btn-outline-primary w-100 my-1">Edit Course</a>
+                {% else %}
+                  {% if course.get_model == "internalcourse" %}
+                  <!-- Make Request-->
+                  <a href="{% url 'courseRequest' course.pk %}" type="submit" class="btn btn-outline-primary w-100 my-1">Make Request</a>
+                  {% endif %}
+                  {% if disabled %}
+                    <!-- Added to Cart (Disabled) -->
+                    <button formaction="{% url 'cart_add' %}" type="submit" class="btn btn-outline-secondary w-100 my-1" disabled>Added to Cart</button>
+                  {% else %}
+                    <!-- Add to Cart (Enabled)-->
+                    <button formaction="{% url 'cart_add' %}" type="submit" class="btn btn-outline-primary w-100 my-1">Add to Cart</button>
+                  {% endif %}
+                {% endif %}
+              </form>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"></div>
+        </div>
+      </div>
+
+      <!--For Testing Purposes Only
+      <p>Equivalents: {{ equivalents }}</p>
+      <p>Specific: {{ equivalents_specific }}</p>
+      -->
+
+      <div class="container-fluid px-5 pt-4" align="left">
+        <div class="text-center">
+          <h5>Course Equivalencies</h5>
+        </div>
+
+        <!-- Define Tabs -->
+        {% if tab %}
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link {{ all_tab }}" id="all-tab" name="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">All Colleges</button>
+          </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {{ specific_tab }}" id="specific-tab" name="specific-tab" data-bs-toggle="tab" data-bs-target="#specific" type="button" role="tab" aria-controls="specific" aria-selected="false">{{ request.session.user_college }}</button>
+            </li>
+        </ul>
+        {% endif %}
+
+        <!-- Course Equivalencies List-->
+        <div class="card">
+
+          <!-- Column Titles -->
+          <div class="card-header d-flex">
+            <div class="col-3">College</div>
+            <div class="col-2">Mnemonic</div>
+            <div class="col-2">Number</div>
+            <div class="col-4">Name</div>
+            <div class="col-1">Action</div>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+
+            <!-- All Equivalencies -->
+            <div class="tab-pane fade {{ all_tab }}" id="all" role="tabpanel" aria-labelledby="all-tab">
+              <!-- Populate Rows of Table -->
+              <ul class="list-group">
+                {% if equivalents %}
+                  {% for e in equivalents %}
+                    <!--Define ID for javascript checkbox -->
+                    <form action="{% url 'update_favorites' %}" method="post">
+                      {% csrf_token %}
+                      <!-- Favorite Button Hidden Fields -->
+                      <input type="hidden" id="all-secondary" name="secondary" value="{{ e.pk }}">
+                      <input type="hidden" id="all-primary" name="primary" value="{{ course.pk }}">
+                      <input type="hidden" id="all-type" name="type" value="{{ course.get_model }}">
+                      <input type="hidden" id="all-active-tab" name="active-tab" value="all">
+                      <!-- Table Cell Values -->
+                      <a href="{% url e.get_model e.pk %}" class="list-group-item list-group-item-{{ e.color }} list-group-item-action d-flex">
+                        <div class="col-3">{{ e.college_name }}</div>
+                        <div class="col-2">{{ e.mnemonic }}</div>
+                        <div class="col-2">{{ e.course_number }}</div>
+                        <div class="col-4">{{ e.course_name }}</div>
+                        <div class="col-1"><button class="btn btn-outline-primary btn-sm">{{ e.action }}</button></div>
+                      </a>
+                    </form>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item list-group-item-light d-flex">No Course Equivalencies Found.</li>
+                {% endif %}
+              </ul>
+            </div>
+
+            <!-- College Specific Equivalencies  -->
+            <div class="tab-pane fade {{ specific_tab }}" id="specific" role="tabpanel" aria-labelledby="specific-tab">
+              <!-- Populate Rows of Table -->
+              <ul class="list-group">
+                {% if equivalents_specific %}
+                  {% for e in equivalents_specific %}
+                    <!--Define ID for javascript checkbox -->
+                    <form action="{% url 'update_favorites' %}" method="post">
+                      {% csrf_token %}
+                      <!-- Favorite Button Hidden Fields -->
+                      <input type="hidden" id="specific-secondary" name="secondary" value="{{ e.pk }}">
+                      <input type="hidden" id="specific-primary" name="primary" value="{{ course.pk }}">
+                      <input type="hidden" id="specific-type" name="type" value="{{ course.get_model }}">
+                      <input type="hidden" id="specific-active-tab" name="active-tab" value="specific">
+                      <!-- Table Cell Values -->
+                      <a href="{% url e.get_model e.pk %}" class="list-group-item list-group-item-{{ e.color }} list-group-item-action d-flex">
+                        <div class="col-3">{{ e.college_name }}</div>
+                        <div class="col-2">{{ e.mnemonic }}</div>
+                        <div class="col-2">{{ e.course_number }}</div>
+                        <div class="col-4">{{ e.course_name }}</div>
+                        <div class="col-1"><button class="btn btn-outline-dark btn-sm">{{ e.action }}</button></div>
+                      </a>
+                    </form>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item list-group-item-light d-flex">No Course Equivalencies Found.</li>
+                {% endif %}
+              </ul>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </content>
+    {% endblock %}
+</body>
+</html>
+
+
+

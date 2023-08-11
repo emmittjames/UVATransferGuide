@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% load bootstrap5 %}
+{% bootstrap_messages %}
+
+{% block title %}Error Page{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-5" align="center">
+  <h1 class="display-6"><i>{{ message }}</i></h1>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"></div>
+
+  <div class="p-4"><h5><a href="{% url 'submit_search' %}" class="text-decoration-none">Search Courses</a></h5></div>
+  <div class="p-4"><h5><a href="{% url 'refresh_request' %}" class="text-decoration-none">View Requests</a></h5></div>
+  <div class="p-4"><h5><a href="{% url 'favorites' %}" class="text-decoration-none">View Favorites</a></h5></div>
+  <div class="p-4"><h5><a href="{% url 'account_info' %}" class="text-decoration-none">Account Info</a></h5></div>
+</div>
+{% endblock %}

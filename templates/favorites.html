@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Favorites{% endblock %}
+
+{% block content %}
+<div class="text-light">
+  <h1>Favorite Courses</h1>
+  <table class="table text-light table-dark">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in favorites %}
+      <tr>
+        
+        <th scope="row">{{f}}</th>
+        <td><a href="{% url 'delete_favorite' f.id %}"><button>X</button></a></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <th scope="row">No favorite courses</th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

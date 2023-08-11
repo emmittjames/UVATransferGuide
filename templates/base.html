@@ -1,0 +1,128 @@
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}{% endblock %}
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+{% if user.is_authenticated%}
+<style>
+    body{
+        margin-top: 15vh;
+        margin-bottom: 5vh;
+    }
+    #dropdown:hover, #dropdown:focus{
+        background-color: rgb(235, 235, 235);
+        color: black;
+    }
+    .pt-2{
+        color:black;
+    }
+    .pt-2:hover{
+        color:rgba(0, 0, 0, 0.606)
+    }
+    .dropdown{
+        position: relative;
+    }
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+</style>
+<script>
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if(isDarkMode) {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+    }
+    else{
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+    }
+
+    invertTheme = function(){
+        theme = document.documentElement.getAttribute('data-bs-theme');
+        if(theme == 'dark'){
+            localStorage.setItem('darkMode', 'false');
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        }
+        else{
+            localStorage.setItem('darkMode', 'true');
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+        }
+    }
+</script>
+{% endif %}
+<body class="d-flex flex-column align-items-center">
+    {% if user.is_authenticated%}
+        <nav class="navbar navbar-expand-md fixed-top w-100 bg-light d-flex align-items-center">
+            <button class="navbar-toggler ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav">
+                    {% if user.groups.all.0.name == 'users' %}
+                        <a href="{% url 'submit_search' %}" class="nav-link left pt-2 mx-3"> Home </a>
+                        <!-- <a href="{% url 'request' %}" class="nav-link pt-2 mx-3"> Request Form </a> -->
+                        <a href="{% url 'refresh_request' %}" class="nav-link pt-2 mx-3"> View Requests </a>
+                        <!-- <a href="#" class="nav-link pt-2 mx-3"> Help </a> -->
+                    {% else %}
+                        <a href="{% url 'submit_search' %}" class="nav-link pt-2 mx-3"> Home </a>
+                        <!-- <a href="#" class="nav-link pt-2 mx-3"> Resolve Help Requests </a> -->
+                        <a href="{% url 'updateCourses' %}" class="nav-link pt-2 mx-3"> Add Course </a>
+                        <a href="{% url 'refresh_request' %}" class="nav-link pt-2 mx-3"> View Requests </a>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="d-flex">
+                <div class="dropdown">
+                    <button class="ms-2 me-3 btn border border-dark" id="dropdown" data-bs-toggle="dropdown">
+                        <a class="nav-link d-flex flex-row align-items-center mx-0 dropdown-toggle">
+                            <img width="40px" height="40px" href="#"
+                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Ic_notifications_none_48px.svg/1280px-Ic_notifications_none_48px.svg.png"> {{ user.notification_set.all.count }}
+                        </a>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        {% if user.notification_set.all.count == 0 %}
+                            <a class="dropdown-item"> No Notifications </a>
+                        {% else %}
+                            {% for note in user.notification_set.all %}
+                            <a class="dropdown-item"> Type: {{ note.notification }} </br> Subject: {{ note.subject }}</a>
+                            {% endfor %}
+                            <a class="dropdown-item" href="{% url 'handle_notifications' %}"><b>View and Dismiss</b></a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="me-3 dropdown btn border border-dark" id="dropdown" data-bs-toggle="dropdown">
+                        <a class="nav-link d-flex flex-row align-items-center mx-0 dropdown-toggle">
+                            <img width="40px" height="40px" href="#"
+                                src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"> {{ user.username }}
+                        </a>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        {% if user.groups.all.0.name == 'users' %}
+                            <a class="dropdown-item" href="{% url 'account_info' %}"> Account Information </a>
+                            <a class="dropdown-item" href="{% url 'favorites' %}"> Favorites </a>
+                            <button class="dropdown-item" onclick="invertTheme()"> Toggle Theme </button>
+                        {% else %}
+                            <a class="dropdown-item" href="{% url 'account_info' %}"> Account Information </a>
+                            <a class="dropdown-item" href="{% url 'favorites' %}"> Favorites </a>
+                            <button class="dropdown-item" onclick="invertTheme()"> Toggle Theme </button>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'logout' %}"> Log Out </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+</body>
+</html>

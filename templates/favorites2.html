@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Favorites Page</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    {# Load the tag library #}
+    {% extends "base.html" %}
+    {% load bootstrap5 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+
+    {% block content %}
+    <content>
+      <div class="container-fluid p-5" align="left">
+        <div class="pb-2">
+          <h3>Favorites</h3>
+        </div>
+
+        {% include "messages.html" with messages=messages%}
+
+        {% if favorites %}
+          <div class="card">
+            <div class="card-header d-flex">
+              <div class="col-3 text-center">External College</div>
+              <div class="col-4 text-center">External Course</div>
+              <div class="col-4 text-center">UVA Equivalent</div>
+              <div class="col-1 text-center">Delete</div>
+            </div>
+            <ul class="list-group">
+              {% for f in favorites %}
+                <form action="{% url 'update_favorites' %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" id="primary" name="primary" value="{{ f.transfer.external_course.pk }}">
+                  <input type="hidden" id="secondary" name="secondary" value="{{ f.transfer.internal_course.pk }}">
+                  <input type="hidden" id="type" name="type" value="favorites">
+                  <input type="hidden" id="active-tab" name="active-tab" value="all">
+
+                  <li class="list-group-item list-group-item-light d-flex">
+                    <div class="col-3 text-center"><a class="list-group-item list-group-item-light disabled h-100">{{ f.transfer.external_course.college_name }}</a></div>
+                    <div class="col-4 text-center"><a href="{% url 'externalcourse' f.transfer.external_course.pk %}" class="list-group-item list-group-item-light list-group-item-action h-100">{{ f.transfer.external_course.mnemonic }} {{ f.transfer.external_course.course_number }}: {{ f.transfer.external_course.course_name }}</a></div>
+                    <div class="col-4 text-center"><a href="{% url 'internalcourse' f.transfer.internal_course.pk %}" class="list-group-item list-group-item-light list-group-item-action h-100">{{ f.transfer.internal_course }}</a></div>
+                    <div class="col-1 text-center"><button class="list-group-item list-group-item-danger list-group-item-action h-100 align-items-center">╳</button></div>
+                    <!-- <div class="col-1 text-center">
+                      <button class="list-group-item list-group-item-danger list-group-item-action h-100 align-items-center">
+                        <img width="25px" height="25px" href="#"
+                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/OOjs_UI_icon_trash_apex.svg/1280px-OOjs_UI_icon_trash_apex.svg.png">
+                      </button>
+                    </div> -->
+                  </li>
+                </form>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="p-3">
+            <h6>Total Credits: {{ total }}</h6>
+          </div>
+        {% else %}
+          <p>No Favorites Found.</p>
+        {% endif %}
+      </div>
+
+    </content>
+    {% endblock %}
+</body>
+</html>
+
+
+

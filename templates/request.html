@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load bootstrap5 %}
+{% bootstrap_messages %}
+
+{% block title %}Request Form{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 w-75 d-flex flex-row align-items-baseline justify-content-between">
+	<div></div><div></div><div></div><div></div> <!-- Spacer -->
+	<div class="d-flex flex-column align-items-center justify-content-center mx-5">
+		<h3>
+			Transfer Request Form
+		</h3>
+		<form action="{% url 'request' %}" method="post" class="form">
+			{% csrf_token %}
+			{% bootstrap_form transfer_form %}
+			<input type="submit" value="Save", name="transfer">
+		</form>
+	</div>
+	<div class="d-flex flex-column align-items-center justify-content-center mx-5">
+		<h3>
+			SIS Lookup
+		</h3>
+		<form action="{% url 'request' %}" method="get" class="form">
+			{% csrf_token %}
+			{% bootstrap_form sis_form %}
+			<input type="submit" value="Save", name="sis">
+		</form>
+		{% for c in r %}
+		<tr>
+			<td>{{c.crse_id}}</td>
+			<td>{{c.subject}}</td>
+			<td>{{c.catalog_nbr}}</td>
+			<td>{{c.descr}}</td>
+		</tr>
+		<br>
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}

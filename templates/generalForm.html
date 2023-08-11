@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Page</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    {# Load the tag library #}
+    {% extends "base.html" %}
+    {% load bootstrap5 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+
+    {% block title %}
+      testing
+    {% endblock %}
+    {% block content %}
+    <content>
+
+      <div class="modal fade" id="addCollege" tabindex="-1" aria-labelledby="Label" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add College</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+
+              <form method = "POST" action ="{% url 'add_college' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="form-group mb-2">
+                    <label for="college">College Name</label>
+                    <input type="text" class="form-control" name="college" id="college" placeholder="University of Virginia" onkeydown="return /[A-Za-z0-9-',/&:.()?! ]/i.test(event.key)">
+                    <div class="form-text">Enter full names only. No acronyms.</div>
+                  </div>
+                  <div class="form-check">
+                    <input type="checkbox" checked class="form-check-input" name="domestic" id="domestic">
+                    <label class="form-check-label" for="domestic">Domestic</label>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+
+            </div>
+          </div>
+        </div>
+
+
+
+      <div class="container-fluid p-5" align="left">
+        <h3>{{ title }}</h3>
+
+        {% include "messages.html" with messages=messages%}
+
+        <form class="row gy-1 gx-15 align-items-center" action="{% url action %}" method="post">
+          {% csrf_token %}
+
+          <!-- Select College From List -->
+          <div class="m-2">
+            <label for="collegeID" class="form-label">College</label>
+            <div class="input-group">
+              <select class="form-select" id="collegeID" name="collegeID" aria-label=".form-select-sm example" aria-describedby="basic-addon2">
+                <option selected value="{{ collegeID }}">{{ college }}</option>
+                {% for c in colleges %}
+                  <option value="{{ c.pk }}">{{ c.college_name }}</option>
+                {% endfor %}
+              </select>
+              <div class="input-group-append">
+                {%if course.get_model == "internalcourse"%}
+                  <button type="button" disabled class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addCollege">Add</button>
+                {% else %}
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCollege">Add</button>
+                {% endif %}
+              </div>
+            </div>
+            <div class="form-text">Locate an institution in the dropdown, or click "add."</div>
+          </div>
+
+
+          <!-- Load / Input Course Mnemonic -->
+          <div class="m-2">
+            <label for="mnemonic" class="form-label">Mnemonic:</label>
+            <input type="text" id="mnemonic" name="mnemonic" maxlength="4" class="form-control" value="{{ course.mnemonic }}" onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+            <div class="form-text">Accepts SIS mnemonics only.</div>
+          </div>
+
+          <!-- Load / Input Course Number -->
+          <div class="m-2">
+            <label for="number" class="form-label">Number:</label>
+            <input type="text" id="number" name="number" maxlength="4" class="form-control" value="{{ course.course_number }}" onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+            <div class="form-text">Enter the full course number.</div>
+          </div>
+
+          <!-- Load / Input Course Name -->
+          <div class="m-2">
+            <label for="name" class="form-label">Title:</label>
+            <input type="text" id="name" name="name" maxlength="200" class="form-control" value="{{ course.course_name }}" onkeydown="return /[A-Za-z0-9-',/&:.()?! ]/i.test(event.key)">
+            <div class="form-text">Enter the full course title.</div>
+          </div>
+
+          <!-- Input Course Credits (Internal Course Add/Update) -->
+          {% if credits %}
+            <div class="form-outline m-2">
+              <label for="internal-credits" class="form-label">Credits</label>
+              <input type="number" min="0" max="6" id="internal-credits" name="credits" class="form-control" value="{{ course.credits }}"/>
+              <div class="form-text">Only considered for UVA courses.</div>
+            </div>
+          {% else %}
+            <div class="form-outline">
+              <input type="hidden" id="external-credits" name="credits" class="form-control" value=""/>
+            </div>
+          {% endif %}
+
+          <!-- Input Course Link (Transfer Request) -->
+          {% if link %}
+            <div class="form-outline m-2">
+              <label for="url" class="form-label">Course Link</label>
+              <input type="url" id="url" name="url" maxlength="200" class="form-control" placeholder="https://example.com"/>
+              <div class="form-text">Provide a link to the course homepage.</div>
+            </div>
+          {% endif %}
+
+          <!-- Input User Comment (Transfer Request) -->
+          {% if comment %}
+            <div class="form-outline m-2">
+              <label for="url" class="form-label">Explanation</label>
+              <textarea id="comment" name="comment" maxlength="200" class="form-control" onkeydown="return /[A-Za-z0-9-',/&:.()?! ]/i.test(event.key)"></textarea>
+              <div class="form-text">Provide your reasoning for making this request.</div>
+            </div>
+          {% endif %}
+
+          <!-- Load Course ID (hidden) -->
+          <div>
+            <input type="hidden" id="id" name="id" maxlength="200" class="form-control" value="{{ courseID }}" >
+          </div>
+
+          <!-- Button for Form Submission -->
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+
+        </form>
+      </div>
+    </content>
+    {% endblock %}
+
+</body>
+</html>
+
+
+

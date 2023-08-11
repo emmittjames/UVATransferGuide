@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+</head>
+<body>
+
+    {# Load the tag library #}
+    {% extends "base.html" %}
+    {% load bootstrap5 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+
+    {% block content %}
+    <content class>
+      {% include "messages.html" with messages=messages%}
+
+      <div class="container-fluid px-5 py-2" align="left">
+
+        <h3>Course Search</h3>
+        <!--Form for entering a course search-->
+        <form class="row gy-1 gx-15 align-items-center" action="{% url 'submit_search' %}" method="post">
+          {% csrf_token %}
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1 pb-2 mb-1 border-bottom"></div>
+          <div class="col-auto">
+            <label for="college" class="form-label">College</label>
+            <input type="text" list="collegeOptions" id="college" name="college" class="form-control" maxlength="200" value="{{request.session.search.college}}" placeholder="University of Virginia" onkeydown="return /[a-zA-Z0-9 ]/i.test(event.key)">
+            <datalist id="collegeOptions">
+              {% for c in colleges %}
+                <option value="{{ c }}">
+              {% endfor %}
+            </datalist>
+            <div class="form-text">Defaults to UVA.</div>
+          </div>
+          <div class="col-auto">
+            <label for="mnemonic" class="form-label">Mnemonic:</label>
+            <input type="text" id="mnemonic" name="mnemonic" maxlength="4" class="form-control" value="{{request.session.search.mnemonic}}" placeholder="MATH"  onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+            <div class="form-text">Accepts SIS mnemonics only.</div>
+          </div>
+          <div class="col-auto">
+            <label for="number" class="form-label">Number:</label>
+            <input type="text" id="number" name="number" maxlength="4" class="form-control" value="{{request.session.search.number}}" placeholder="1320" onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+            <div class="form-text">Enter a full or partial course number.</div>
+          </div>
+          <div class="col-auto">
+            <label for="name" class="form-label">Title:</label>
+            <input type="text" id="name" name="name" maxlength="200" class="form-control" value="{{request.session.search.name}}" placeholder="Calculus II" onkeydown="return /[A-Za-z0-9-',/&:.()?! ]/i.test(event.key)">
+            <div class="form-text">Try full names or key terms.</div>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+          </div>
+          <div class="col-auto">
+            <a href="{% url 'submit_search' %}" class="btn btn-danger" role="button" aria-pressed="true">Clear</a>
+          </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1 pb-2 mb-1 border-bottom"></div>
+        </form>
+      </div>
+
+
+      <div class="container-fluid px-5 pb-2" align="left">
+        {% if course_list %}
+          <div class="card">
+            <div class="card-header d-flex">
+              <div class="col-3">College</div>
+              <div class="col-2">Mnemonic</div>
+              <div class="col-2">Number</div>
+              <div class="col-2">Name</div>
+              <div class="col-1"></div>
+            </div>
+            <ul class="list-group">
+              {% for course in course_list.all %}
+                <a href="{% url course.get_model course.id %}" class="list-group-item list-group-item-{% if user in course.get_users %}success{% else %}light{% endif %} list-group-item-action d-flex">
+                  <div class="col-3">{{ course.college_name }}</div>
+                  <div class="col-2">{{ course.mnemonic }}</div>
+                  <div class="col-2">{{ course.course_number }}</div>
+                  <div class="col-2">{{ course.course_name }}</div>
+
+                  <!--div class="col-1"></div>
+                    <form method="POST" action="{% url 'add_to_cart' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="college" value= "{{ course.college_name }}">
+                      <input type="hidden" name="item_id" value="{{ course.id }}">
+                      <button type="submit">Add to Cart</button>
+                    </form>
+                  </div-->
+
+                </a>
+              {% endfor %}
+            </ul>
+          </div>
+        {% else %}
+        <p>No Courses Available.<br>Try using the <a data-bs-toggle="modal" href="#sisLookup" class="text-decoration-none">UVA SIS Lookup</a> if the course was last offered over 4 years ago.</p>
+        {% endif %}
+      </div>
+
+      <!-- Shopping Cart (Connor) -->
+      <div class="container-fluid px-5 py-2" align="left">
+        {% if request.session.SC %}
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"></div>
+          <h5><a class="text-decoration-none link-secondary" data-bs-toggle="collapse" href="#collapseBox" role="button" aria-expanded="false" aria-controls="collapseBox">
+            Shopping Cart ›
+          </a></h5>
+          <div class="card collapse {{ cart }}" id="collapseBox">
+            <div class="card-header d-flex">
+              <div class="col-3">College</div>
+              <div class="col-2">Mnemonic</div>
+              <div class="col-2">Number</div>
+              <div class="col-2">Name</div>
+            </div>
+            <ul class="list-group">
+              {% if cart_internal %}
+                <a href="{% url 'internalcourse' cart_internal.id %}" class="list-group-item list-group-item-action d-flex">
+                  <div class="col-3">{{ cart_internal.college_name }}</div>
+                  <div class="col-2">{{ cart_internal.mnemonic }}</div>
+                  <div class="col-2">{{ cart_internal.course_number }}</div>
+                  <div class="col-2">{{ cart_internal.course_name }}</div>
+                </a>
+              {% else %}
+              <li class="list-group-item list-group-item-light d-flex" style="color:gray"><i>Empty Internal Course</i></li>
+              {% endif %}
+
+              {% if cart_external %}
+                <a href="{% url 'externalcourse' cart_external.id %}" class="list-group-item list-group-item-action d-flex">
+                  <div class="col-3">{{ cart_external.college_name }}</div>
+                  <div class="col-2">{{ cart_external.mnemonic }}</div>
+                  <div class="col-2">{{ cart_external.course_number }}</div>
+                  <div class="col-2">{{ cart_external.course_name }}</div>
+                </a>
+              {% else %}
+                <li class="list-group-item list-group-item-light d-flex" style="color:gray"><i>Empty External Course</i></li>
+              {% endif %}
+            </ul>
+          </div>
+          {% if cart_internal and cart_external %}
+            <div class="text-center m-2 p-2"><a data-bs-toggle="modal" href="#scRequest" class="btn btn-primary">Make Transfer Request</a></div>
+          {% endif %}
+        {% endif %}
+
+      <!-- Shopping Cart (Gabe) -->
+      <!--div class="container-fluid px-5 pb-2" align="left">
+        {% if cart %}
+          <div class="container mt-4 text-left">
+            <div class="row">
+              <div class="col">
+                <div class="card">
+                  <div class="card-header text-left">Your Cart (Holds one UVA course and one external Course)</div>
+                  <div class="card-body">
+                    <div class="row">
+
+                      <div class="col-md-6">
+                        {% if cart.get_ic %}
+                          <div class="card">
+                            <div class="card-header">Internal Course</div>
+                            <div class="card-body">
+                              <p><strong>Name:</strong> {{ cart.get_ic.course_name }}</p>
+                              <p><strong>Mnemonic:</strong> {{ cart.get_ic.mnemonic }}</p>
+                              <p><strong>Number:</strong> {{ cart.get_ic.course_number }}</p>
+                              <p><strong>Credits:</strong> {{ cart.get_ic.credits }}</p>
+                            </div>
+                          </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="col-md-6">
+                        {% if cart.get_ec %}
+                          <div class="card">
+                            <div class="card-header">External Course</div>
+                            <div class="card-body">
+                              <p><strong>College:</strong> {{ cart.get_ec.college }}</p>
+                              <p><strong>Name:</strong> {{ cart.get_ec.course_name }}</p>
+                              <p><strong>Mnemonic:</strong> {{ cart.get_ec.mnemonic }}</p>
+                              <p><strong>Number:</strong> {{ cart.get_ec.course_number }}</p>
+                            </div>
+                          </div>
+                        {% endif %}
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% if cart.get_ec and cart.get_ic %}
+            <form method="POST" action="{% url 'cart_TR' %}">
+              {% csrf_token %}
+              <h3>Enter optional comment for Transfer Request:</h3>
+              <textarea name="comment" cols="50" rows="5"></textarea>
+              <input type="hidden" name="external_course_number" value="{{ cart.get_ec.course_number }}">
+              <input type="hidden" name="external_course_college" value="{{ cart.get_ec.college }}">
+              <input type="hidden" name="external_course_name" value="{{ cart.get_ec.course_name }}">
+              <input type="hidden" name="external_course_mnemonic" value="{{ cart.get_ec.mnemonic}}">
+              <input type="hidden" name="external_course_id" value="{{ cart.get_ec.id}}">
+              <input type="hidden" name="internal_course_id" value="{{ cart.get_ic.id }}">
+              <input type="hidden" name="internal_course_number" value="{{ cart.get_ic.course_number }}">
+              <input type="hidden" name="internal_course_mnemonic" value="{{ cart.get_ic.mnemonic }}">
+              <input type="hidden" name="internal_course_name" value="{{ cart.get_ic.course_name }}">
+
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit">Submit Transfer Request</button>
+                </div>
+              </div>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div> -->
+
+      <!-- SIS Lookup Modal -->
+      <div class="modal fade" id="sisLookup" tabindex="-1" aria-labelledby="sisLookupLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <div class="modal-header">
+              <h5 class="modal-title" id="sisLookupLabel">UVA SIS Lookup</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body" align="left">
+              <form method="post" class="row gy-1 gx-15 align-items-center">
+                {% csrf_token %}
+                <div class="col-auto">
+                  <label for="mnemonic" class="form-label">Mnemonic:</label>
+                  <input type="text" id="sisMnemonic" name="sisMnemonic" maxlength="4" class="form-control" placeholder="MATH"  onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+                  <div class="form-text">Accepts SIS mnemonics only.</div>
+                </div>
+                <div class="col-auto">
+                  <label for="number" class="form-label">Number:</label>
+                  <input type="text" id="sisNumber" name="sisNumber" maxlength="4" class="form-control" placeholder="1320" onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+                  <div class="form-text">Enter a full course number.</div>
+                </div>
+                <div class="text-center p-2">
+                  <button class="btn btn-success" formaction="{% url 'sis_lookup' %}"> Lookup </button>
+                  <p style="color:gray;"><i>Sit back and relax. This may take a moment.</i></p>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Shopping Cart TR Modal -->
+      <div class="modal fade" id="scRequest" tabindex="-1" aria-labelledby="scRequestLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <div class="modal-header">
+              <h5 class="modal-title" id="scRequestLabel">Shopping Cart Transfer Request</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body" align="left">
+              <form method="post" class="row gy-1 gx-15 align-items-center">
+                {% csrf_token %}
+                <div class="form-outline">
+                  <label for="url" class="form-label">Course Link</label>
+                  <input type="url" id="url" name="url" maxlength="200" class="form-control" placeholder="https://example.com"/>
+                  <div class="form-text">Provide a link to the course homepage.</div>
+                </div>
+                <div class="form-outline">
+                  <label for="url" class="form-label">Explanation</label>
+                  <textarea id="comment" name="comment" maxlength="200" class="form-control" onkeydown="return /[A-Za-z0-9-',/&:.()?! ]/i.test(event.key)"></textarea>
+                  <div class="form-text">Provide your reasoning for making this request.</div>
+                </div>
+                <div class="text-center p-2">
+                  <button class="btn btn-success" formaction="{% url 'sc_request' %}">Submit Request</button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </content>
+    {% endblock %}
+</body>

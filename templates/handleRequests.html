@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Requests</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+</head>
+<body class="d-flex flex-column">
+    {# Load the tag library #}
+    {% extends "base.html" %}
+    {% load bootstrap5 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+
+    {% block content %}
+    <content>
+
+      <!-- Modal -->
+      <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Handle Transfer Request</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+              <div>
+                <div class="form-text"><a id="name" href="" class="link-primary text-decoration-none">Test</a>'s Explanation:</div>
+                <input type="text" id="comment" name="comment" readonly class="form-control-plaintext" value="" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="right" title=""/>
+              </div>
+              {% if isAdmin %}
+                <form method="post">
+                  {% csrf_token %}
+                  <div class="form-outline">
+                    <div class="form-text">Comment (Optional):</div>
+                    <textarea id="adminResponse" name="adminResponse" maxlength="200" class="form-control" onkeydown="return /[A-Za-z0-9-',/&:.()?! ]/i.test(event.key)"></textarea>
+                  </div>
+                  <input type="hidden" name="requestID" id="requestID" value=""/>
+                  <input type="hidden" name="tab" id="tab" value=""/>
+                  <div class="text-center p-2">
+                    <button class="btn btn-success" formaction="{% url 'accept_request' %}"> Accept </button>
+                    <button class="btn btn-dark btn-sm" formaction="{% url 'delete_request' %}"> Delete </button>
+                    <button class="btn btn-danger" formaction="{% url 'reject_request' %}"> Reject </button>
+                  </div>
+                </form>
+              {% else %}
+                <div id="style" class="form-text">
+                    <div class="form-text">Admin Comment: </div>
+                    <input type="text" id="userResponse" name="userResponse" readonly class="form-control-plaintext" value="" data-bs-html="true" data-bs-toggle="tooltip" data-bs-placement="right" title=""/>
+                </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Script for passing request ID to modal -->
+      <script type="text/javascript">
+          $(document).on("click", ".open-ActionModal", function () {
+            var requestID = $(this).data('id');
+            var comment = $(this).data('comment');
+            var userResponse = $(this).data('response');
+            var adminResponse = $(this).data('response');
+            userResponse = userResponse === "" ? "(None)" : userResponse;
+            var style = $(this).data('style');
+            var tab = $(this).data('tab');
+            var created = $(this).data('created');
+            var updated = $(this).data('updated');
+            var username = $(this).data('username');
+            var userURL = "{% url 'handleRequests' %}/" + username;
+            var name = $(this).data('name');
+            name = name.trim() === "" ? username : name;
+
+            $(".modal-body #requestID").val( requestID );
+            $(".modal-body #comment").val( comment );
+            $(".modal-body #userResponse").val( userResponse );
+            $(".modal-body #adminResponse").val( adminResponse );
+            $(".modal-body #style").css("display", style);
+            $(".modal-body #tab").val( tab );
+            $(".modal-body #comment").prop('title', "Requested <em><b>" + created + "</b></em> ago.");
+            $(".modal-body #userResponse").prop('title', "Resolved <em><b>" + updated + "</b></em> ago.");
+            $(".modal-body #name").attr('href', userURL);
+            $(".modal-body #name").text(name);
+
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {return new bootstrap.Tooltip(tooltipTriggerEl)})
+          });
+      </script>
+
+      <!-- Container for Page Content -->
+      <div class="container-fluid p-5" align="left">
+        <!-- Define Header -->
+        {% if profile %}
+        <h3><span style="color:gray">View Requests | </span>{% if name.strip %}{{ name }}{% else %}{{ profile.username }}{% endif %}</h3>
+        {% else %}
+          <h3>View Requests</h3>
+        {% endif %}
+
+        <!-- Show Error Messages -->
+        {% include "messages.html" with messages=messages%}
+
+        <!-- Admin View for Specific User Requests -->
+        {% if profile %}
+          <!-- Link to General Requests Page -->
+          <a href="{% url 'handleRequests' %}" class="link-primary text-decoration-none">← Back to All Requests</a>
+          <!-- List User Profile Attributes -->
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-2 mb-2 border-bottom"></div>
+          <h5>User Profile</h5>
+          <ul>
+            <li><b>Name</b>: {% if name.strip %}{{ name }}{% else %}<i>Unknown</i>{% endif %}</li>
+            <li><b>Username</b>: {{ profile.username }}</li>
+            <li><b>Email</b>: {{ profile.email }}</li>
+          </ul>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-2 border-bottom"></div>
+
+        <!-- Admin View for User Links -->
+        {% elif isAdmin %}
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-2 mb-2 border-bottom"></div>
+          <h5>Recent Users</h5>
+
+          <!-- Table Headings -->
+          <div class="card pb-2 mb-2">
+            <div class="card-header d-flex">
+              <div class="col-4">Username</div>
+              <div class="col-4">Name</div>
+              <div class="col-1">#</div>
+              <div class="col-3">Time</div>
+            </div>
+
+            <ul class="list-group">
+              {% if user_list %}
+                {% for u in user_list %}
+                  <a href="{% url 'profilePage' u.username %}" class="list-group-item list-group-item-action d-flex">
+                    <div class="col-4">{{ u.username }}</div>
+                    <div class="col-4">{% if u.name.strip %}{{ u.name }}{% else %} - {% endif %}</div>
+                    <div class="col-1">{{ u.count }}</div>
+                    <div class="col-3">{{ u.time|timesince}}</div>
+                  </a>
+                {% endfor %}
+              {% else %}
+                <li class="list-group-item list-group-item-light d-flex">No Recent Users Found.</li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 mb-3 border-bottom"></div>
+
+        <!-- Common User View for their Own Requests-->
+        {% else %}
+          <!-- Progress Bar -->
+          <div class="progress m-2">
+            <!-- Accepted -->
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ accepted_pct }}%" aria-valuenow="{{ accepted_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+            <!-- Pending  -->
+            <div class="progress-bar bg-info" role="progressbar" style="width: {{ pending_pct }}%" aria-valuenow="{{ pending_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+            <!-- Rejected  -->
+            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ rejected_pct }}%" aria-valuenow="{{ rejected_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        {% endif %}
+
+        <h5>Recent Requests</h5>
+        <!-- Define Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link {{ pending_tab }}" id="pending-tab" name="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">Pending</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link {{ accepted_tab }}" id="accepted-tab" name="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab" aria-controls="accepted" aria-selected="false">Accepted</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link {{ rejected_tab }}" id="rejected-tab" name="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab" aria-controls="rejected" aria-selected="false">Rejected</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link {{ all_tab }}" id="all-tab" name="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="false">All</button>
+          </li>
+        </ul>
+
+        <!-- Table Headings -->
+        <div class="card">
+          <div class="card-header d-flex">
+            <div class="col-3 text-center">College</div>
+            <div class="col-4 text-center">Course Link</div>
+            <div class="col-4 text-center">UVA Equivalent</div>
+            <div class="col-1 text-center"></div>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Pending Requests -->
+            <div class="tab-pane fade {{ pending_tab }}" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+              <ul class="list-group">
+                {% if pending %}
+                  {% for r in pending %}
+                    <li class="list-group-item list-group-item-{{ r.color }} d-flex">
+                      <div class="col-3 text-center"><a class="list-group-item list-group-item-{{ r.color }} h-100">{{ r.transfer.external_course.college_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{{ r.url }}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.external_course.mnemonic }} {{ r.transfer.external_course.course_number }}: {{ r.transfer.external_course.course_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{% url 'internalcourse' r.transfer.internal_course.pk %}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.internal_course }}</a></div>
+                      <div class="col-1 text-center"><button type="button" data-id="{{ r.id }}" data-comment="{{ r.comment }}" data-response="{{ r.response }}" data-style="{{ r.visibility }}" data-tab="pending" data-created="{{ r.created_at|timesince }}" data-updated="{{ r.updated_at|timesince }}" data-name="{{ r.user.first_name }} {{ r.user.last_name }}" data-username="{{ r.user.username }}" class="open-ActionModal btn btn-{{ r.btn }}" data-bs-toggle="modal" data-bs-target="#actionModal">⋮</button></div>
+                    </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item list-group-item-light d-flex">No Pending Transfer Requests Found.</li>
+                {% endif %}
+              </ul>
+            </div>
+
+            <!-- Accepted Requests -->
+            <div class="tab-pane fade {{ accepted_tab }}" id="accepted" role="tabpanel" aria-labelledby="pending-tab">
+              <ul class="list-group">
+                {% if accepted %}
+                  {% for r in accepted %}
+                    <li class="list-group-item list-group-item-{{ r.color }} d-flex">
+                      <div class="col-3 text-center"><a class="list-group-item list-group-item-{{ r.color }} h-100">{{ r.transfer.external_course.college_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{{ r.url }}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.external_course.mnemonic }} {{ r.transfer.external_course.course_number }}: {{ r.transfer.external_course.course_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{% url 'internalcourse' r.transfer.internal_course.pk %}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.internal_course }}</a></div>
+                      <div class="col-1 text-center"><button type="button" data-id="{{ r.id }}" data-comment="{{ r.comment }}" data-response="{{ r.response }}" data-style="{{ r.visibility }}" data-tab="accepted" data-created="{{ r.created_at|timesince }}" data-updated="{{ r.updated_at|timesince }}" data-name="{{ r.user.first_name }} {{ r.user.last_name }}" data-username="{{ r.user.username }}" class="open-ActionModal btn btn-{{ r.btn }}" data-bs-toggle="modal" data-bs-target="#actionModal">⋮</button></div>
+                    </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item list-group-item-light d-flex">No Accepted Transfer Requests Found.</li>
+                {% endif %}
+              </ul>
+            </div>
+
+            <!-- Rejected Requests -->
+            <div class="tab-pane fade {{ rejected_tab }}" id="rejected" role="tabpanel" aria-labelledby="pending-tab">
+              <ul class="list-group">
+                {% if rejected %}
+                  {% for r in rejected %}
+                    <li class="list-group-item list-group-item-{{ r.color }} d-flex">
+                      <div class="col-3 text-center"><a class="list-group-item list-group-item-{{ r.color }} h-100">{{ r.transfer.external_course.college_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{{ r.url }}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.external_course.mnemonic }} {{ r.transfer.external_course.course_number }}: {{ r.transfer.external_course.course_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{% url 'internalcourse' r.transfer.internal_course.pk %}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.internal_course }}</a></div>
+                      <div class="col-1 text-center"><button type="button" data-id="{{ r.id }}" data-comment="{{ r.comment }}" data-response="{{ r.response }}" data-style="{{ r.visibility }}" data-tab="rejected" data-created="{{ r.created_at|timesince }}" data-updated="{{ r.updated_at|timesince }}" data-name="{{ r.user.first_name }} {{ r.user.last_name }}" data-username="{{ r.user.username }}" class="open-ActionModal btn btn-{{ r.btn }}" data-bs-toggle="modal" data-bs-target="#actionModal">⋮</button></div>
+                    </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item list-group-item-light d-flex">No Rejected Transfer Requests Found.</li>
+                {% endif %}
+              </ul>
+            </div>
+
+            <!-- All Requests -->
+            <div class="tab-pane fade {{ all_tab }}" id="all" role="tabpanel" aria-labelledby="pending-tab">
+              <ul class="list-group">
+                {% if all %}
+                  {% for r in all %}
+                    <li class="list-group-item list-group-item-{{ r.color }} d-flex">
+                      <div class="col-3 text-center"><a class="list-group-item list-group-item-{{ r.color }} h-100">{{ r.transfer.external_course.college_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{{ r.url }}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.external_course.mnemonic }} {{ r.transfer.external_course.course_number }}: {{ r.transfer.external_course.course_name }}</a></div>
+                      <div class="col-4 text-center"><a href="{% url 'internalcourse' r.transfer.internal_course.pk %}" class="list-group-item list-group-item-{{ r.color }} list-group-item-action h-100">{{ r.transfer.internal_course }}</a></div>
+                      <div class="col-1 text-center"><button type="button" data-id="{{ r.id }}" data-comment="{{ r.comment }}" data-response="{{ r.response }}" data-style="{{ r.visibility }}" data-tab="all" data-created="{{ r.created_at|timesince }}" data-updated="{{ r.updated_at|timesince }}" data-name="{{ r.user.first_name }} {{ r.user.last_name }}" data-username="{{ r.user.username }}" class="open-ActionModal btn btn-{{ r.btn }}" data-bs-toggle="modal" data-bs-target="#actionModal">⋮</button></div>
+                    </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item list-group-item-light d-flex">No Transfer Requests Found.</li>
+                {% endif %}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+
+      </div>
+
+    </content>
+    {% endblock %}
+</body>
+</html>

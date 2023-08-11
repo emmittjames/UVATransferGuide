@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% load socialaccount %}
+
+{% block title %} Account Information {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid p-5" align="center">
+  <h3>Account Information</h3>
+  <table class="table h5 mt-3 w-auto">
+    <tbody>
+      <tr><th scope="row"> Username: </th><td> {{ user.username }} </td></tr>
+      <tr><th scope="row"> First Name: </th><td> {{ user.first_name }} </td></tr>
+      <tr><th scope="row"> Last Name: </th><td> {{ user.last_name }} </td></tr>
+      <tr><th scope="row"> Email Address: </th><td> {{ user.email }} </td></tr>
+      <tr><th scope="row"> Permissions: </th><td> {{ permissions }} </td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="container-fluid px-5 py-2" align="center">
+  {% if permissions != "Admin" %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"></div>
+    <form action="{% url 'admin_upgrade' %}" method="post" class="form d-flex flex-column align-items-center w-25">
+      {% csrf_token %}
+      <input type="text" name="key" id="key" class="w-100 form-control text-center" placeholder="Enter admin key">
+      <input type="submit" value="Upgrade to Admin" name="admin_upgrade" class="btn btn-primary mt-3 w-50">
+    </form>
+  {% else %}
+  {% endif %}
+</div>
+
+{% endblock %}
