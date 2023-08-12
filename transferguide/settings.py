@@ -27,7 +27,7 @@ SECURE_SSL_REDIRECT = True
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'transferguide.herokuapp.com', 'testserver', 'uvatransferguide-ba0013ae3635.herokuapp.com']
 
