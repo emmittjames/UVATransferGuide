@@ -18,17 +18,18 @@ from django.contrib.messages import constants as messages
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = True
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y#x6@#b=amu1t66jbcs9kb5zym!-**m_3h7bi&av_x#yr=1ca8'
+# SECRET_KEY = 'django-insecure-y#x6@#b=amu1t66jbcs9kb5zym!-**m_3h7bi&av_x#yr=1ca8'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'transfer-guide.herokuapp.com', 'testserver']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'uvatransferguide-ba0013ae3635.herokuapp.com', 'uvatransferguide.com']
 
 # storing session data in the database for shopping cart
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -95,20 +97,20 @@ DATABASES = {
     }
 }
 """
-"""
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd91okdepde0qki',
-        'USER': 'rtvsisurfamdhr',
-        'PASSWORD': '39772c6d00d368f0c4f6fa5779b24f28570b0c5a7bc00010b9b1f7010b62d509',
-        'HOST': 'ec2-54-227-248-71.compute-1.amazonaws.com',
+        'NAME': 'd2v4a2m8c2n1ce',
+        'USER': 'xshjdktzmzojtf',
+        'PASSWORD': '4f05732774985a90f47210ad55d8dbd53f4167acaa1b03d88aedb177ab170d93',
+        'HOST': 'ec2-3-92-151-217.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }
-"""
 
-DATABASES = {}
+
+# DATABASES = {}
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -155,6 +157,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -168,7 +171,7 @@ import dotenv
 dotenv_file = os.path.join(BASE_DIR, ".env")
 if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
-"""
+
 #Error prevention
 
 try:
@@ -186,7 +189,7 @@ try:
         }
 except ImportError:
     found = False
-
+"""
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -207,7 +210,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-SITE_ID = 4
+SITE_ID = 1
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
