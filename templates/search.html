@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Search</title>
+  <meta charset="UTF-8">
+  <title>Search</title>
 </head>
 <body>
 
@@ -81,22 +81,12 @@
                   <div class="col-2">{{ course.mnemonic }}</div>
                   <div class="col-2">{{ course.course_number }}</div>
                   <div class="col-2">{{ course.course_name }}</div>
-
-                  <!--div class="col-1"></div>
-                    <form method="POST" action="{% url 'add_to_cart' %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="college" value= "{{ course.college_name }}">
-                      <input type="hidden" name="item_id" value="{{ course.id }}">
-                      <button type="submit">Add to Cart</button>
-                    </form>
-                  </div-->
-
                 </a>
               {% endfor %}
             </ul>
           </div>
         {% else %}
-        <p>No Courses Available.<br>Try using the <a data-bs-toggle="modal" href="#sisLookup" class="text-decoration-none">UVA SIS Lookup</a> if the course was last offered over 4 years ago.</p>
+        <p>No Courses Available, make sure to fill at least one field.</p><br>Try using the <a data-bs-toggle="modal" href="#sisLookup" class="text-decoration-none">UVA SIS Lookup</a> if the course was last offered over 4 years ago.
         {% endif %}
       </div>
 
