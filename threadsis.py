@@ -1,3 +1,11 @@
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
+
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
 from django.db.utils import IntegrityError
 from transferguideapp.models import InternalCourse
 import requests
@@ -17,27 +25,34 @@ for i in range(len(sr['subjects'])):
 url = 'https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_ClassSearch?institution=UVA01'
 page = '&page='
 subject = '&subject='
+term = '&term='
+terms = ['1238', '1232', '1228', '1222', '1218', '1212', '1208', '1202'] # Term format = 1 + year + [2 for spring 8 for fall]
 
 
 def get_json(s):
     i = 0
     r = [{}]
-    while r != []:
-        i += 1
-        print(url + subject + s + page + str(i))
-        try:
-            r = requests.get(url + subject + s + page + str(i), timeout=30).json()
-        except Exception as error:
-            print(f"timeout error. probably caused by network. small quantity of classes may not have been processed.")
-            i -= 1
-            continue
-        #print(r)
-        queue_lock.acquire()
-        json_queue.put(r)
-        queue_lock.release()
-    else:
-        i = 0
-
+    for t in terms:
+        timeouts = 0
+        while r != []:
+            i += 1
+            print(url + subject + s + page + str(i) + term + t)
+            try:
+                r = requests.get(url + subject + s + page + str(i) + term + t, timeout=30).json()
+            except Exception as error:
+                print("timeout error. probably caused by network. small quantity of classes may not have been processed. Total timeouts: {timeouts}")
+                i -= 1
+                timeouts += 1
+                continue
+            #print(r)
+            queue_lock.acquire()
+            json_queue.put(r)
+            queue_lock.release()
+            if timeouts>=5:
+                break
+        else:
+            i = 0
+            print("No more classes")
 exitFlag = 0
 def process():
     while not exitFlag:
