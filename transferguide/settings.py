@@ -96,20 +96,20 @@ DATABASES = {
     }
 }
 """
-"""
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd91okdepde0qki',
-        'USER': 'rtvsisurfamdhr',
-        'PASSWORD': '39772c6d00d368f0c4f6fa5779b24f28570b0c5a7bc00010b9b1f7010b62d509',
-        'HOST': 'ec2-54-227-248-71.compute-1.amazonaws.com',
+        'NAME': 'd2v4a2m8c2n1ce',
+        'USER': 'xshjdktzmzojtf',
+        'PASSWORD': '4f05732774985a90f47210ad55d8dbd53f4167acaa1b03d88aedb177ab170d93',
+        'HOST': 'ec2-3-92-151-217.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }
-"""
 
-DATABASES = {}
+
+# DATABASES = {}
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -164,7 +164,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Optional, use to access posgres with HEROKU=0 and appropiate DATABASE_URL, having this
 #uncommented wont break anything on production
-
+"""
 import dotenv
 dotenv_file = os.path.join(BASE_DIR, ".env")
 if os.path.isfile(dotenv_file):
@@ -187,7 +187,7 @@ try:
         }
 except ImportError:
     found = False
-
+"""
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
