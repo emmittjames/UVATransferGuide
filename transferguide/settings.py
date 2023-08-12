@@ -164,12 +164,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Optional, use to access posgres with HEROKU=0 and appropiate DATABASE_URL, having this
 #uncommented wont break anything on production
-"""
+
 import dotenv
 dotenv_file = os.path.join(BASE_DIR, ".env")
 if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
-"""
+
 #Error prevention
 
 try:
