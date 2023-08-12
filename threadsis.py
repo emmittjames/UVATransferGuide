@@ -5,17 +5,6 @@ import queue
 import threading
 import time
 
-import os
-import django
-from django.core.management import execute_from_command_line
-from django.conf import settings
-
-# Set the DJANGO_SETTINGS_MODULE
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "transferguide.settings")
-
-# Initialize Django
-django.setup()
-
 url = "https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_ClassSearchOptions?institution=UVA01"
 
 sr = requests.get(url, timeout=15).json()
