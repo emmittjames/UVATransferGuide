@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'uvatransferguide-ba0013ae3635.herokuapp.com', 'uvatransferguide.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'uvatransferguide-ba0013ae3635.herokuapp.com', 'uvatransferguide.com', 'www.uvatransferguide.com']
 
 # storing session data in the database for shopping cart
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
