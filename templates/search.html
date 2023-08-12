@@ -215,7 +215,7 @@
             </div>
 
             <div class="modal-body" align="left">
-              <form method="post" class="row gy-1 gx-15 align-items-center">
+              <form method="post" class="row gy-1 gx-15 align-items-center justify-content-center">
                 {% csrf_token %}
                 <div class="col-auto">
                   <label for="mnemonic" class="form-label">Mnemonic:</label>
@@ -229,7 +229,7 @@
                 </div>
                 <div class="text-center p-2">
                   <button class="btn btn-success" formaction="{% url 'sis_lookup' %}"> Lookup </button>
-                  <p style="color:gray;"><i>Sit back and relax. This may take a moment.</i></p>
+                  <p class="pt-4" style="color:gray;"><i>Sit back and relax. This may take a moment.</i></p>
                 </div>
               </form>
             </div>
