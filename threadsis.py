@@ -49,10 +49,10 @@ def get_json(s):
             json_queue.put(r)
             queue_lock.release()
             if timeouts>=5:
+                print("Too many timeouts")
                 break
         else:
             i = 0
-            print("No more classes")
 exitFlag = 0
 def process():
     while not exitFlag:
