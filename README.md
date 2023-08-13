@@ -50,22 +50,19 @@ DATABASES = {
 }
 ```
 5. Set up Google OAuth by following [this guide](https://www.section.io/engineering-education/django-google-oauth/)
-6. Use the following command to start the server on port 8000
-   ```
-   python manage.py runserver
-   ````
-8. Everything should be up and running on your [local host](https://localhost:8000)
+6. Use the command `python manage.py runserver` to start the server on localhost with port 8000
+7. Everything should be up and running on your [localhost](https://localhost:8000)
 
 ## Sample Images
 
-#### Viewing ratings on the map
-<img width="1440" alt="Viewing ratings" src="https://user-images.githubusercontent.com/90576219/216737244-dd2f58f1-1dfe-47fb-bbb1-f2856571b41e.png">
+#### Student searching for all UVA MATH courses with algebra in the title
+<img width="1440" alt="Screenshot 2023-08-13 at 1 34 22 AM" src="https://github.com/emmittjames/UVATransferGuide/assets/90576219/2c357b3d-214e-41e8-821d-69a4cb77fe3e">
 
-#### Submitting a water fountain rating
-<img width="1440" alt="Submitting rating" src="https://user-images.githubusercontent.com/90576219/216737257-750f673f-5447-4047-9f72-cd9d08849670.png">
+#### Student viewing all course equivalencies for a UVA course
+<img width="1440" alt="Screenshot 2023-08-13 at 12 44 32 AM" src="https://github.com/emmittjames/UVATransferGuide/assets/90576219/3b0b9bbf-68b9-425f-896d-298faf0032ae">
 
-#### Giving feedback on the site
-<img width="1440" alt="Submitting feedback" src="https://user-images.githubusercontent.com/90576219/216737404-2fcf3b53-143b-4d7b-8227-9dcc17d944c9.png">
+#### Student viewing personal requests that were accepted/rejected by an admin
+<img width="1440" alt="Screenshot 2023-08-13 at 12 34 45 AM" src="https://github.com/emmittjames/UVATransferGuide/assets/90576219/c2f85450-50b8-4430-9654-0d58435c7ca6">
 
-## License
-Distributed under the MIT License. See ```LICENSE``` for more information
+#### Admin handling transfer request
+<img width="1440" alt="Screenshot 2023-08-13 at 1 40 12 AM" src="https://github.com/emmittjames/UVATransferGuide/assets/90576219/276631fe-9f49-49b2-b204-3bc740adecba">
