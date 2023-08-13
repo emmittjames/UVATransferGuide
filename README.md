@@ -36,22 +36,16 @@ DATABASES = {
     }
 }
 ```
-Then, remove this code in settings.py in order to stop using the PostgreSQL database
+Then, remove this code in settings.py in order to ensure that the local database is used
 ```
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('NAME'),
-        'USER': os.environ.get('USER'),
-        'PASSWORD': os.environ.get('PASSWORD'),
-        'HOST': 'ec2-3-92-151-217.compute-1.amazonaws.com',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 ```
-5. Set up Google OAuth by following [this guide](https://www.section.io/engineering-education/django-google-oauth/)
-6. Use the command `python manage.py runserver` to start the server on localhost with port 8000
-7. Everything should be up and running on your [localhost](https://localhost:8000)
+5. Populate the database with UVA courses from the last 4 years by running `threadsis.py`
+6. Set up Google OAuth by following [this guide](https://www.section.io/engineering-education/django-google-oauth/)
+7. Use the command `python manage.py runserver` to start the server on localhost with port 8000
+8. Everything should be up and running on your [localhost](https://localhost:8000)
 
 ## Sample Images
 
