@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-import sys
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,13 +22,12 @@ SECURE_SSL_REDIRECT = True
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-y#x6@#b=amu1t66jbcs9kb5zym!-**m_3h7bi&av_x#yr=1ca8'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'uvatransferguide-ba0013ae3635.herokuapp.com', 'uvatransferguide.com', 'www.uvatransferguide.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'uvatransferguide-ba0013ae3635.herokuapp.com', 'uvatransferguide.com', 'www.uvatransferguide.com']
 
 # storing session data in the database for shopping cart
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -98,19 +96,18 @@ DATABASES = {
 }
 """
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd2v4a2m8c2n1ce',
-        'USER': 'xshjdktzmzojtf',
-        'PASSWORD': '4f05732774985a90f47210ad55d8dbd53f4167acaa1b03d88aedb177ab170d93',
+        'NAME': os.environ.get('NAME'),
+        'USER': os.environ.get('USER'),
+        'PASSWORD': os.environ.get('PASSWORD'),
         'HOST': 'ec2-3-92-151-217.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }
 
-
-# DATABASES = {}
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -163,33 +160,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-#Optional, use to access posgres with HEROKU=0 and appropiate DATABASE_URL, having this
-#uncommented wont break anything on production
-"""
-import dotenv
-dotenv_file = os.path.join(BASE_DIR, ".env")
-if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
-
-#Error prevention
-
-try:
-    if 'HEROKU' in os.environ:
-        import django_heroku
-        from django_heroku import dj_database_url
-        django_heroku.settings(locals())
-        DATABASES['default'] = dj_database_url.config(conn_max_age=600)
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
-except ImportError:
-    found = False
-"""
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
