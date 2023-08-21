@@ -5,7 +5,6 @@
 * [Technologies](#technologies)
 * [Cloning](#cloning)
 * [Sample Images](#sample-images)
-* [License](#license)
 
 ## General Info
 #### Website link: [uvatransferguide.com](https://uvatransferguide.com)
